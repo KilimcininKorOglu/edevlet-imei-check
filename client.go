@@ -235,7 +235,8 @@ func submitForm(client *http.Client, imei, captchaCode, token string) (string, e
 	}
 
 	location := resp.Header.Get("Location")
-	if !strings.Contains(location, "asama=1") {
+	parsedLoc, err := url.Parse(location)
+	if err != nil || parsedLoc.Query().Get("asama") != "1" {
 		return "", fmt.Errorf("unexpected redirect: %s (captcha may be wrong)", location)
 	}
 
