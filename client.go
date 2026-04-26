@@ -19,14 +19,15 @@ const (
 	captchaURL = "/captcha?uniquePage=877"
 	userAgent  = "Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0"
 
-	maxRetries = 3
-	retryDelay = 2 * time.Second
+	defaultMaxAttempts = 10
+	retryDelay         = 2 * time.Second
 )
 
 type Config struct {
 	GeminiAPIKey  string
 	GeminiAPIKeys []string
 	GeminiModel   string
+	MaxAttempts   int
 }
 
 type QueryResult struct {
@@ -39,7 +40,8 @@ type QueryResult struct {
 }
 
 type Client struct {
-	solver *captcha.Solver
+	solver      *captcha.Solver
+	maxAttempts int
 }
 
 func New(cfg Config) *Client {
@@ -47,16 +49,21 @@ func New(cfg Config) *Client {
 	if model == "" {
 		model = "gemini-2.5-flash-lite"
 	}
-	maxRetries := len(cfg.GeminiAPIKeys) + 3
-	if maxRetries < 5 {
-		maxRetries = 5
+	solverRetries := len(cfg.GeminiAPIKeys) + 3
+	if solverRetries < 5 {
+		solverRetries = 5
+	}
+	maxAttempts := cfg.MaxAttempts
+	if maxAttempts <= 0 {
+		maxAttempts = defaultMaxAttempts
 	}
 	return &Client{
+		maxAttempts: maxAttempts,
 		solver: captcha.New(captcha.Config{
 			APIKey:     cfg.GeminiAPIKey,
 			APIKeys:    cfg.GeminiAPIKeys,
 			Model:      model,
-			MaxRetries: maxRetries,
+			MaxRetries: solverRetries,
 			Prompt:     "Read the CAPTCHA text. Reply with ONLY the characters (letters and numbers), nothing else. The CAPTCHA is usually 5 characters.",
 		}),
 	}
@@ -64,17 +71,17 @@ func New(cfg Config) *Client {
 
 func (c *Client) Query(imei string) (*QueryResult, error) {
 	var lastErr error
-	for attempt := 1; attempt <= maxRetries; attempt++ {
+	for attempt := 1; attempt <= c.maxAttempts; attempt++ {
 		result, err := c.queryOnce(imei)
 		if err == nil {
 			return result, nil
 		}
 		lastErr = err
-		if attempt < maxRetries {
+		if attempt < c.maxAttempts {
 			time.Sleep(retryDelay)
 		}
 	}
-	return nil, fmt.Errorf("query failed after %d attempts: %w", maxRetries, lastErr)
+	return nil, fmt.Errorf("query failed after %d attempts: %w", c.maxAttempts, lastErr)
 }
 
 func (c *Client) queryOnce(imei string) (*QueryResult, error) {
