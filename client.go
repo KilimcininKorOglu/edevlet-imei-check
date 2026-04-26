@@ -45,7 +45,7 @@ type Client struct {
 func New(cfg Config) *Client {
 	model := cfg.GeminiModel
 	if model == "" {
-		model = "gemini-2.5-flash"
+		model = "gemini-2.0-flash"
 	}
 	maxRetries := len(cfg.GeminiAPIKeys) + 3
 	if maxRetries < 5 {
