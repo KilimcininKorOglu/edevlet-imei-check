@@ -47,12 +47,17 @@ func New(cfg Config) *Client {
 	if model == "" {
 		model = "gemini-2.5-flash"
 	}
+	maxRetries := len(cfg.GeminiAPIKeys) + 3
+	if maxRetries < 5 {
+		maxRetries = 5
+	}
 	return &Client{
 		solver: captcha.New(captcha.Config{
-			APIKey:  cfg.GeminiAPIKey,
-			APIKeys: cfg.GeminiAPIKeys,
-			Model:   model,
-			Prompt: "Read the CAPTCHA text. Reply with ONLY the characters (letters and numbers), nothing else. The CAPTCHA is usually 5 characters.",
+			APIKey:     cfg.GeminiAPIKey,
+			APIKeys:    cfg.GeminiAPIKeys,
+			Model:      model,
+			MaxRetries: maxRetries,
+			Prompt:     "Read the CAPTCHA text. Reply with ONLY the characters (letters and numbers), nothing else. The CAPTCHA is usually 5 characters.",
 		}),
 	}
 }
