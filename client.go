@@ -24,8 +24,9 @@ const (
 )
 
 type Config struct {
-	GeminiAPIKey string
-	GeminiModel  string
+	GeminiAPIKey  string
+	GeminiAPIKeys []string
+	GeminiModel   string
 }
 
 type QueryResult struct {
@@ -48,8 +49,9 @@ func New(cfg Config) *Client {
 	}
 	return &Client{
 		solver: captcha.New(captcha.Config{
-			APIKey: cfg.GeminiAPIKey,
-			Model:  model,
+			APIKey:  cfg.GeminiAPIKey,
+			APIKeys: cfg.GeminiAPIKeys,
+			Model:   model,
 			Prompt: "Read the CAPTCHA text. Reply with ONLY the characters (letters and numbers), nothing else. The CAPTCHA is usually 5 characters.",
 		}),
 	}
