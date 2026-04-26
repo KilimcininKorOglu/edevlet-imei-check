@@ -69,7 +69,22 @@ func New(cfg Config) *Client {
 	}
 }
 
+func validateIMEI(imei string) error {
+	if len(imei) != 15 {
+		return fmt.Errorf("invalid IMEI: must be exactly 15 characters, got %d", len(imei))
+	}
+	for i, c := range imei {
+		if c < '0' || c > '9' {
+			return fmt.Errorf("invalid IMEI: non-digit character at position %d", i)
+		}
+	}
+	return nil
+}
+
 func (c *Client) Query(imei string) (*QueryResult, error) {
+	if err := validateIMEI(imei); err != nil {
+		return nil, err
+	}
 	var lastErr error
 	for attempt := 1; attempt <= c.maxAttempts; attempt++ {
 		result, err := c.queryOnce(imei)
