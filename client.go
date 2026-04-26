@@ -123,6 +123,9 @@ func (c *Client) queryOnce(imei string) (*QueryResult, error) {
 	if err != nil {
 		return nil, fmt.Errorf("solve captcha: %w", err)
 	}
+	if captchaCode == "" {
+		return nil, fmt.Errorf("solve captcha: empty solution")
+	}
 
 	redirectPath, err := submitForm(httpClient, imei, captchaCode, token)
 	if err != nil {
