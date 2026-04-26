@@ -20,6 +20,7 @@ const (
 	userAgent  = "Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0"
 
 	defaultMaxAttempts = 10
+	maxMaxAttempts     = 50
 	retryDelay         = 5 * time.Second
 )
 
@@ -56,6 +57,9 @@ func New(cfg Config) *Client {
 	maxAttempts := cfg.MaxAttempts
 	if maxAttempts <= 0 {
 		maxAttempts = defaultMaxAttempts
+	}
+	if maxAttempts > maxMaxAttempts {
+		maxAttempts = maxMaxAttempts
 	}
 	return &Client{
 		maxAttempts: maxAttempts,
