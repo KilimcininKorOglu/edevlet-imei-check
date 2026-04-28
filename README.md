@@ -1,6 +1,6 @@
 # edevlet-imei-check
 
-e-Devlet (turkiye.gov.tr) uzerinden IMEI kayit durumu sorgulayan Go kutuphanesi. CAPTCHA cozumunu [ai-captcha-solver](https://github.com/KilimcininKorOglu/ai-captcha-solver) ile otomatik olarak yapar.
+e-Devlet (turkiye.gov.tr) üzerinden IMEI kayıt durumu sorgulayan Go kütüphanesi. CAPTCHA çözümünü [ai-captcha-solver](https://github.com/KilimcininKorOglu/ai-captcha-solver) ile otomatik olarak yapar.
 
 ## Kurulum
 
@@ -8,9 +8,9 @@ e-Devlet (turkiye.gov.tr) uzerinden IMEI kayit durumu sorgulayan Go kutuphanesi.
 go get github.com/KilimcininKorOglu/edevlet-imei-check
 ```
 
-Go 1.22 veya ustu gereklidir (Go 1.26 ile gelistirilmistir).
+Go 1.22 veya üstü gereklidir (Go 1.26 ile geliştirilmiştir).
 
-## Hizli Baslangic
+## Hızlı Başlangıç
 
 ```go
 package main
@@ -29,7 +29,7 @@ func main() {
 
 	result, err := client.Query("IMEI_NUMARASI")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "sorgu basarisiz: %v\n", err)
+		fmt.Fprintf(os.Stderr, "sorgu başarısız: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -41,9 +41,9 @@ func main() {
 }
 ```
 
-## API Key Havuzu
+## API Anahtar Havuzu
 
-Toplu sorgularda rate limit'e takilmamak icin birden fazla Gemini API anahtari kullanabilirsiniz:
+Toplu sorgularda rate limit'e takılmamak için birden fazla API anahtarı kullanabilirsiniz:
 
 ```go
 client := edevlet.New(edevlet.Config{
@@ -55,58 +55,58 @@ client := edevlet.New(edevlet.Config{
 })
 ```
 
-Rate limit (429) alindiginda anahtarlar otomatik olarak rotate edilir. Detaylar icin [ai-captcha-solver](https://github.com/KilimcininKorOglu/ai-captcha-solver) dokumantasyonuna bakin.
+Rate limit (429) alındığında anahtarlar otomatik olarak rotate edilir. Detaylar için [ai-captcha-solver](https://github.com/KilimcininKorOglu/ai-captcha-solver) dokümantasyonuna bakın.
 
-## Yapilandirma
+## Yapılandırma
 
-| Alan          | Tip      | Varsayilan              | Aciklama                                     |
-|---------------|----------|-------------------------|----------------------------------------------|
-| GeminiAPIKey  | string   |                         | Tek API anahtari                             |
-| GeminiAPIKeys | []string |                         | Anahtar havuzu (tek anahtara gore oncelikli) |
-| GeminiModel   | string   | `gemini-2.5-flash-lite` | Gemini model adi                             |
-| MaxAttempts   | int      | `10`                    | Maksimum sorgu deneme sayisi                 |
+| Alan          | Tip      | Varsayılan              | Açıklama                                      |
+|---------------|----------|-------------------------|-----------------------------------------------|
+| GeminiAPIKey  | string   |                         | Tek API anahtarı                              |
+| GeminiAPIKeys | []string |                         | Anahtar havuzu (tek anahtara göre öncelikli)  |
+| GeminiModel   | string   | `gemini-2.5-flash-lite` | Model adı                                     |
+| MaxAttempts   | int      | `10`                    | Maksimum sorgu deneme sayısı                  |
 
-## Durum Degerleri
+## Durum Değerleri
 
-`QueryResult.Status` alani asagidaki degerlerden birine normalize edilir:
+`QueryResult.Status` alanı aşağıdaki değerlerden birine normalize edilir:
 
-| Durum          | e-Devlet Yaniti                                                        | Anlami                         |
+| Durum          | e-Devlet Yanıtı                                                        | Anlamı                         |
 |----------------|------------------------------------------------------------------------|--------------------------------|
-| `registered`   | IMEI NUMARASI KAYITLI                                                  | Yasal olarak kayitli           |
-| `blocked`      | 1 yil veya daha uzun suredir kullanilmadigi icin kapatilmis cihaz      | Devre disi (1 yildan fazla)    |
-| `unregistered` | KAYITDISI OLDUGU TESPIT EDILEN IMEI                                    | Kayit disi tespit edilmis      |
-| `cloned`       | Bu IMEI numarasinin baska cihazlara kopyalandigi tespit edilmistir     | Klonlanmis IMEI tespit edilmis |
-| `not_found`    | KAYIT BULUNAMADI                                                       | Veritabaninda bulunamadi       |
-| `unknown`      | (diger yanitlar)                                                       | Taninmayan durum               |
+| `registered`   | IMEI NUMARASI KAYITLI                                                  | Yasal olarak kayıtlı           |
+| `blocked`      | 1 yıl veya daha uzun süredir kullanılmadığı için kapatılmış cihaz      | Devre dışı (1 yıldan fazla)    |
+| `unregistered` | KAYITDIŞI OLDUĞU TESPİT EDİLEN IMEI                                   | Kayıt dışı tespit edilmiş      |
+| `cloned`       | Bu IMEI numarasının başka cihazlara kopyalandığı tespit edilmiştir     | Klonlanmış IMEI tespit edilmiş |
+| `not_found`    | KAYIT BULUNAMADI                                                       | Veritabanında bulunamadı       |
+| `unknown`      | (diğer yanıtlar)                                                       | Tanınmayan durum               |
 
-## QueryResult Alanlari
+## QueryResult Alanları
 
 ```go
 type QueryResult struct {
-	IMEI      string // Sorgulanan IMEI numarasi
-	Status    string // Normalize edilmis durum (yukaridaki tabloya bakin)
-	RawStatus string // e-Devlet'ten gelen orijinal Turkce metin
-	Source    string // Kayit kaynagi
-	Brand     string // Cihaz markasi
+	IMEI      string // Sorgulanan IMEI numarası
+	Status    string // Normalize edilmiş durum (yukarıdaki tabloya bakın)
+	RawStatus string // e-Devlet'ten gelen orijinal Türkçe metin
+	Source    string // Kayıt kaynağı
+	Brand     string // Cihaz markası
 	Model     string // Cihaz modeli
 }
 ```
 
-## Nasil Calisir
+## Nasıl Çalışır
 
-1. e-Devlet IMEI sorgulama form sayfasini yukler
-2. CSRF token'i cikarir ve CAPTCHA gorselini indirir
-3. [ai-captcha-solver](https://github.com/KilimcininKorOglu/ai-captcha-solver) ile CAPTCHA'yi cozer (Gemini, OpenAI, Anthropic destekler)
-4. IMEI, CAPTCHA cozumu ve CSRF token ile formu gonderir
-5. 302 yonlendirmesini takip ederek sonuc sayfasina ulasir
-6. HTML yanitini parse eder ve durumu normalize eder
+1. e-Devlet IMEI sorgulama form sayfasını yükler
+2. CSRF token'ı çıkarır ve CAPTCHA görselini indirir
+3. [ai-captcha-solver](https://github.com/KilimcininKorOglu/ai-captcha-solver) ile CAPTCHA'yı çözer (Gemini, OpenAI, Anthropic destekler)
+4. IMEI, CAPTCHA çözümü ve CSRF token ile formu gönderir
+5. 302 yönlendirmesini takip ederek sonuç sayfasına ulaşır
+6. HTML yanıtını parse eder ve durumu normalize eder
 
-Her sorgu yeni bir HTTP oturumu (temiz cookie jar) olusturur. Basarisiz denemeler 5 saniye arayla en fazla 10 kez (MaxAttempts ile ayarlanabilir) tekrarlanir.
+Her sorgu yeni bir HTTP oturumu (temiz cookie jar) oluşturur. Başarısız denemeler 5 saniye arayla en fazla 10 kez (`MaxAttempts` ile ayarlanabilir) tekrarlanır.
 
 ## Gereksinimler
 
-- CAPTCHA cozumu icin AI API anahtari -- ucretsiz Gemini anahtari almak icin [Google AI Studio](https://aistudio.google.com/app/apikey)
-- turkiye.gov.tr'ye erisim
+- CAPTCHA çözümü için AI API anahtarı -- ücretsiz seçenekler için [ai-captcha-solver dokümantasyonuna](https://github.com/KilimcininKorOglu/ai-captcha-solver#free-api-providers) bakın
+- turkiye.gov.tr'ye erişim
 
 ## Lisans
 
