@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	captcha "github.com/KilimcininKorOglu/gemini-captcha-solver"
+	captcha "github.com/KilimcininKorOglu/ai-captcha-solver"
 )
 
 const (
