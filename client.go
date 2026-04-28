@@ -25,10 +25,12 @@ const (
 )
 
 type Config struct {
-	GeminiAPIKey  string
-	GeminiAPIKeys []string
-	GeminiModel   string
-	MaxAttempts   int
+	Provider    string
+	BaseURL     string
+	APIKey      string
+	APIKeys     []string
+	Model       string
+	MaxAttempts int
 }
 
 type QueryResult struct {
@@ -46,11 +48,7 @@ type Client struct {
 }
 
 func New(cfg Config) *Client {
-	model := cfg.GeminiModel
-	if model == "" {
-		model = "gemini-2.5-flash-lite"
-	}
-	solverRetries := len(cfg.GeminiAPIKeys) + 3
+	solverRetries := len(cfg.APIKeys) + 3
 	if solverRetries < 5 {
 		solverRetries = 5
 	}
@@ -64,11 +62,12 @@ func New(cfg Config) *Client {
 	return &Client{
 		maxAttempts: maxAttempts,
 		solver: captcha.New(captcha.Config{
-			APIKey:     cfg.GeminiAPIKey,
-			APIKeys:    cfg.GeminiAPIKeys,
-			Model:      model,
+			Provider:   cfg.Provider,
+			BaseURL:    cfg.BaseURL,
+			APIKey:     cfg.APIKey,
+			APIKeys:    cfg.APIKeys,
+			Model:      cfg.Model,
 			MaxRetries: solverRetries,
-			Prompt:     "Read the CAPTCHA text. Reply with ONLY the characters (letters and numbers), nothing else. The CAPTCHA is usually 5 characters.",
 		}),
 	}
 }
