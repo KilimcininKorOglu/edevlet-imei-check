@@ -1,16 +1,16 @@
 # edevlet-imei-check
 
-A Go library that checks IMEI registration status on Turkey's e-Devlet (turkiye.gov.tr) portal. Automatically solves CAPTCHAs using [ai-captcha-solver](https://github.com/KilimcininKorOglu/ai-captcha-solver).
+e-Devlet (turkiye.gov.tr) uzerinden IMEI kayit durumu sorgulayan Go kutuphanesi. CAPTCHA cozumunu [ai-captcha-solver](https://github.com/KilimcininKorOglu/ai-captcha-solver) ile otomatik olarak yapar.
 
-## Installation
+## Kurulum
 
 ```bash
 go get github.com/KilimcininKorOglu/edevlet-imei-check
 ```
 
-Requires Go 1.22 or later (developed with Go 1.26).
+Go 1.22 veya ustu gereklidir (Go 1.26 ile gelistirilmistir).
 
-## Quick Start
+## Hizli Baslangic
 
 ```go
 package main
@@ -27,23 +27,23 @@ func main() {
 		GeminiAPIKey: os.Getenv("GEMINI_API_KEY"),
 	})
 
-	result, err := client.Query("YOUR_IMEI_NUMBER")
+	result, err := client.Query("IMEI_NUMARASI")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "query failed: %v\n", err)
+		fmt.Fprintf(os.Stderr, "sorgu basarisiz: %v\n", err)
 		os.Exit(1)
 	}
 
 	fmt.Printf("IMEI:   %s\n", result.IMEI)
-	fmt.Printf("Status: %s (%s)\n", result.RawStatus, result.Status)
-	fmt.Printf("Source: %s\n", result.Source)
-	fmt.Printf("Brand:  %s\n", result.Brand)
+	fmt.Printf("Durum:  %s (%s)\n", result.RawStatus, result.Status)
+	fmt.Printf("Kaynak: %s\n", result.Source)
+	fmt.Printf("Marka:  %s\n", result.Brand)
 	fmt.Printf("Model:  %s\n", result.Model)
 }
 ```
 
-## API Key Pool
+## API Key Havuzu
 
-For bulk queries, use multiple Gemini API keys to avoid rate limits:
+Toplu sorgularda rate limit'e takilmamak icin birden fazla Gemini API anahtari kullanabilirsiniz:
 
 ```go
 client := edevlet.New(edevlet.Config{
@@ -55,59 +55,59 @@ client := edevlet.New(edevlet.Config{
 })
 ```
 
-Keys are rotated automatically on rate limit (429). See [ai-captcha-solver](https://github.com/KilimcininKorOglu/ai-captcha-solver) for details.
+Rate limit (429) alindiginda anahtarlar otomatik olarak rotate edilir. Detaylar icin [ai-captcha-solver](https://github.com/KilimcininKorOglu/ai-captcha-solver) dokumantasyonuna bakin.
 
-## Configuration
+## Yapilandirma
 
-| Field         | Type     | Default                 | Description                               |
-|---------------|----------|-------------------------|-------------------------------------------|
-| GeminiAPIKey  | string   |                         | Single Gemini API key                     |
-| GeminiAPIKeys | []string |                         | Key pool (takes priority over single key) |
-| GeminiModel   | string   | `gemini-2.5-flash-lite` | Gemini model name                         |
-| MaxAttempts   | int      | `10`                    | Max query retry attempts                  |
+| Alan          | Tip      | Varsayilan              | Aciklama                                     |
+|---------------|----------|-------------------------|----------------------------------------------|
+| GeminiAPIKey  | string   |                         | Tek API anahtari                             |
+| GeminiAPIKeys | []string |                         | Anahtar havuzu (tek anahtara gore oncelikli) |
+| GeminiModel   | string   | `gemini-2.5-flash-lite` | Gemini model adi                             |
+| MaxAttempts   | int      | `10`                    | Maksimum sorgu deneme sayisi                 |
 
-## Status Values
+## Durum Degerleri
 
-The `QueryResult.Status` field is normalized to one of these values:
+`QueryResult.Status` alani asagidaki degerlerden birine normalize edilir:
 
-| Status         | e-Devlet Response                                                  | Meaning                    |
-|----------------|--------------------------------------------------------------------|----------------------------|
-| `registered`   | IMEI NUMARASI KAYITLI                                              | Legally registered         |
-| `blocked`      | 1 yil veya daha uzun suredir kullanilmadigi icin kapatilmis cihaz  | Deactivated (inactive 1y+) |
-| `unregistered` | KAYITDISI OLDUGU TESPIT EDILEN IMEI                                | Detected as unregistered   |
-| `cloned`       | Bu IMEI numarasinin baska cihazlara kopyalandigi tespit edilmistir | Cloned IMEI detected       |
-| `not_found`    | KAYIT BULUNAMADI                                                   | Not in database            |
-| `unknown`      | (any other response)                                               | Unrecognized status        |
+| Durum          | e-Devlet Yaniti                                                        | Anlami                         |
+|----------------|------------------------------------------------------------------------|--------------------------------|
+| `registered`   | IMEI NUMARASI KAYITLI                                                  | Yasal olarak kayitli           |
+| `blocked`      | 1 yil veya daha uzun suredir kullanilmadigi icin kapatilmis cihaz      | Devre disi (1 yildan fazla)    |
+| `unregistered` | KAYITDISI OLDUGU TESPIT EDILEN IMEI                                    | Kayit disi tespit edilmis      |
+| `cloned`       | Bu IMEI numarasinin baska cihazlara kopyalandigi tespit edilmistir     | Klonlanmis IMEI tespit edilmis |
+| `not_found`    | KAYIT BULUNAMADI                                                       | Veritabaninda bulunamadi       |
+| `unknown`      | (diger yanitlar)                                                       | Taninmayan durum               |
 
-## QueryResult Fields
+## QueryResult Alanlari
 
 ```go
 type QueryResult struct {
-	IMEI      string // Queried IMEI number
-	Status    string // Normalized status (see table above)
-	RawStatus string // Original Turkish text from e-Devlet
-	Source    string // Registration source
-	Brand     string // Device brand
-	Model     string // Device model
+	IMEI      string // Sorgulanan IMEI numarasi
+	Status    string // Normalize edilmis durum (yukaridaki tabloya bakin)
+	RawStatus string // e-Devlet'ten gelen orijinal Turkce metin
+	Source    string // Kayit kaynagi
+	Brand     string // Cihaz markasi
+	Model     string // Cihaz modeli
 }
 ```
 
-## How It Works
+## Nasil Calisir
 
-1. Loads the e-Devlet IMEI query form page
-2. Extracts CSRF token and downloads CAPTCHA image
-3. Solves CAPTCHA via [ai-captcha-solver](https://github.com/KilimcininKorOglu/ai-captcha-solver) (supports Gemini, OpenAI, Anthropic)
-4. Submits the form with IMEI, CAPTCHA solution, and CSRF token
-5. Follows the 302 redirect to the result page
-6. Parses the HTML response and normalizes the status
+1. e-Devlet IMEI sorgulama form sayfasini yukler
+2. CSRF token'i cikarir ve CAPTCHA gorselini indirir
+3. [ai-captcha-solver](https://github.com/KilimcininKorOglu/ai-captcha-solver) ile CAPTCHA'yi cozer (Gemini, OpenAI, Anthropic destekler)
+4. IMEI, CAPTCHA cozumu ve CSRF token ile formu gonderir
+5. 302 yonlendirmesini takip ederek sonuc sayfasina ulasir
+6. HTML yanitini parse eder ve durumu normalize eder
 
-Each query creates a fresh HTTP session (new cookie jar) to avoid token reuse issues. Failed attempts are retried up to 10 times (configurable via `MaxAttempts`) with a 5-second delay.
+Her sorgu yeni bir HTTP oturumu (temiz cookie jar) olusturur. Basarisiz denemeler 5 saniye arayla en fazla 10 kez (MaxAttempts ile ayarlanabilir) tekrarlanir.
 
-## Requirements
+## Gereksinimler
 
-- AI API key for CAPTCHA solving -- get a free Gemini key at [Google AI Studio](https://aistudio.google.com/app/apikey)
-- Network access to turkiye.gov.tr
+- CAPTCHA cozumu icin AI API anahtari -- ucretsiz Gemini anahtari almak icin [Google AI Studio](https://aistudio.google.com/app/apikey)
+- turkiye.gov.tr'ye erisim
 
-## License
+## Lisans
 
 MIT
