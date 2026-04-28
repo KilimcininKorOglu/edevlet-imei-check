@@ -1,6 +1,6 @@
 # edevlet-imei-check
 
-A Go library that checks IMEI registration status on Turkey's e-Devlet (turkiye.gov.tr) portal. Automatically solves CAPTCHAs using [gemini-captcha-solver](https://github.com/KilimcininKorOglu/gemini-captcha-solver).
+A Go library that checks IMEI registration status on Turkey's e-Devlet (turkiye.gov.tr) portal. Automatically solves CAPTCHAs using [ai-captcha-solver](https://github.com/KilimcininKorOglu/ai-captcha-solver).
 
 ## Installation
 
@@ -55,7 +55,7 @@ client := edevlet.New(edevlet.Config{
 })
 ```
 
-Keys are rotated automatically on rate limit (429). See [gemini-captcha-solver](https://github.com/KilimcininKorOglu/gemini-captcha-solver) for details.
+Keys are rotated automatically on rate limit (429). See [ai-captcha-solver](https://github.com/KilimcininKorOglu/ai-captcha-solver) for details.
 
 ## Configuration
 
@@ -73,9 +73,9 @@ The `QueryResult.Status` field is normalized to one of these values:
 | Status         | e-Devlet Response                                                  | Meaning                    |
 |----------------|--------------------------------------------------------------------|----------------------------|
 | `registered`   | IMEI NUMARASI KAYITLI                                              | Legally registered         |
-| `blocked`      | 1 yıl veya daha uzun süredir kullanılmadığı için kapatılmış cihaz  | Deactivated (inactive 1y+) |
-| `unregistered` | KAYITDIŞI OLDUĞU TESPİT EDİLEN IMEI                                | Detected as unregistered   |
-| `cloned`       | Bu IMEI numarasının başka cihazlara kopyalandığı tespit edilmiştir | Cloned IMEI detected       |
+| `blocked`      | 1 yil veya daha uzun suredir kullanilmadigi icin kapatilmis cihaz  | Deactivated (inactive 1y+) |
+| `unregistered` | KAYITDISI OLDUGU TESPIT EDILEN IMEI                                | Detected as unregistered   |
+| `cloned`       | Bu IMEI numarasinin baska cihazlara kopyalandigi tespit edilmistir | Cloned IMEI detected       |
 | `not_found`    | KAYIT BULUNAMADI                                                   | Not in database            |
 | `unknown`      | (any other response)                                               | Unrecognized status        |
 
@@ -86,7 +86,7 @@ type QueryResult struct {
 	IMEI      string // Queried IMEI number
 	Status    string // Normalized status (see table above)
 	RawStatus string // Original Turkish text from e-Devlet
-	Source    string // Registration source (e.g. "İthalat yoluyla kaydedilen IMEI")
+	Source    string // Registration source
 	Brand     string // Device brand
 	Model     string // Device model
 }
@@ -96,7 +96,7 @@ type QueryResult struct {
 
 1. Loads the e-Devlet IMEI query form page
 2. Extracts CSRF token and downloads CAPTCHA image
-3. Solves CAPTCHA via Google Gemini API
+3. Solves CAPTCHA via [ai-captcha-solver](https://github.com/KilimcininKorOglu/ai-captcha-solver) (supports Gemini, OpenAI, Anthropic)
 4. Submits the form with IMEI, CAPTCHA solution, and CSRF token
 5. Follows the 302 redirect to the result page
 6. Parses the HTML response and normalizes the status
@@ -105,7 +105,7 @@ Each query creates a fresh HTTP session (new cookie jar) to avoid token reuse is
 
 ## Requirements
 
-- Google Gemini API key -- get one free at [Google AI Studio](https://aistudio.google.com/app/apikey)
+- AI API key for CAPTCHA solving -- get a free Gemini key at [Google AI Studio](https://aistudio.google.com/app/apikey)
 - Network access to turkiye.gov.tr
 
 ## License
