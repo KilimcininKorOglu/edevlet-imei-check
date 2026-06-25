@@ -8,7 +8,7 @@ e-Devlet (turkiye.gov.tr) üzerinden IMEI kayıt durumu sorgulayan Go kütüphan
 go get github.com/KilimcininKorOglu/edevlet-imei-check
 ```
 
-Go 1.22 veya üstü gereklidir (Go 1.26 ile geliştirilmiştir).
+Go 1.26.2 veya üstü gereklidir (`go.mod` içindeki `go 1.26.2` direktifi nedeniyle).
 
 ## Hızlı Başlangıç
 
@@ -74,27 +74,27 @@ Rate limit (429) alındığında anahtarlar otomatik olarak rotate edilir. Detay
 
 ## Yapılandırma
 
-| Alan        | Tip      | Varsayılan              | Açıklama                                             |
-|-------------|----------|-------------------------|------------------------------------------------------|
-| Provider    | string   | `gemini`                | Sağlayıcı: `gemini`, `openai`, `anthropic`           |
-| BaseURL     | string   | Sağlayıcı varsayılanı   | Özel API base URL'i                                   |
-| APIKey      | string   |                         | Tek API anahtarı                                      |
+| Alan        | Tip      | Varsayılan              | Açıklama                                                      |
+|-------------|----------|-------------------------|---------------------------------------------------------------|
+| Provider    | string   | `gemini`                | Sağlayıcı: `gemini`, `openai`, `anthropic`                    |
+| BaseURL     | string   | Sağlayıcı varsayılanı   | Özel API base URL'i                                           |
+| APIKey      | string   |                         | Tek API anahtarı                                              |
 | APIKeys     | []string |                         | Anahtar havuzu (yalnızca Gemini, tek anahtara göre öncelikli) |
-| Model       | string   | `gemini-2.5-flash-lite` | Model adı (OpenAI/Anthropic için zorunlu)             |
-| MaxAttempts | int      | `10`                    | Maksimum sorgu deneme sayısı                          |
+| Model       | string   | `gemini-2.5-flash-lite` | Model adı (OpenAI/Anthropic için zorunlu)                     |
+| MaxAttempts | int      | `10`                    | Maksimum sorgu deneme sayısı (en fazla 50'ye sınırlanır)      |
 
 ## Durum Değerleri
 
 `QueryResult.Status` alanı aşağıdaki değerlerden birine normalize edilir:
 
-| Durum          | e-Devlet Yanıtı                                                        | Anlamı                         |
-|----------------|------------------------------------------------------------------------|--------------------------------|
-| `registered`   | IMEI NUMARASI KAYITLI                                                  | Yasal olarak kayıtlı           |
-| `blocked`      | 1 yıl veya daha uzun süredir kullanılmadığı için kapatılmış cihaz      | Devre dışı (1 yıldan fazla)    |
-| `unregistered` | KAYITDIŞI OLDUĞU TESPİT EDİLEN IMEI                                   | Kayıt dışı tespit edilmiş      |
-| `cloned`       | Bu IMEI numarasının başka cihazlara kopyalandığı tespit edilmiştir     | Klonlanmış IMEI tespit edilmiş |
-| `not_found`    | KAYIT BULUNAMADI                                                       | Veritabanında bulunamadı       |
-| `unknown`      | (diğer yanıtlar)                                                       | Tanınmayan durum               |
+| Durum          | e-Devlet Yanıtı                                                    | Anlamı                         |
+|----------------|--------------------------------------------------------------------|--------------------------------|
+| `registered`   | IMEI NUMARASI KAYITLI                                              | Yasal olarak kayıtlı           |
+| `blocked`      | 1 yıl veya daha uzun süredir kullanılmadığı için kapatılmış cihaz  | Devre dışı (1 yıldan fazla)    |
+| `unregistered` | KAYITDIŞI OLDUĞU TESPİT EDİLEN IMEI                                | Kayıt dışı tespit edilmiş      |
+| `cloned`       | Bu IMEI numarasının başka cihazlara kopyalandığı tespit edilmiştir | Klonlanmış IMEI tespit edilmiş |
+| `not_found`    | KAYIT BULUNAMADI                                                   | Veritabanında bulunamadı       |
+| `unknown`      | (diğer yanıtlar)                                                   | Tanınmayan durum               |
 
 ## QueryResult Alanları
 
