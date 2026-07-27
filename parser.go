@@ -122,14 +122,8 @@ func extractStatusFromText(html string) string {
 	for _, p := range statusPatterns {
 		if strings.Contains(stripped, p) {
 			idx := strings.Index(stripped, p)
-			start := idx - 50
-			if start < 0 {
-				start = 0
-			}
-			end := idx + len(p) + 50
-			if end > len(stripped) {
-				end = len(stripped)
-			}
+			start := max(idx-50, 0)
+			end := min(idx+len(p)+50, len(stripped))
 			return strings.TrimSpace(stripped[start:end])
 		}
 	}
@@ -163,20 +157,18 @@ func NormalizeStatus(raw string) string {
 }
 
 func parseBrandModel(raw string) (brand, model string) {
-	if idx := strings.Index(raw, "Marka:"); idx != -1 {
-		rest := raw[idx+6:]
-		if end := strings.Index(rest, ","); end != -1 {
-			brand = strings.TrimSpace(rest[:end])
-		} else if end := strings.Index(rest, "Model"); end != -1 {
-			brand = strings.TrimSpace(rest[:end])
+	if _, rest, found := strings.Cut(raw, "Marka:"); found {
+		if before, _, ok := strings.Cut(rest, ","); ok {
+			brand = strings.TrimSpace(before)
+		} else if before, _, ok := strings.Cut(rest, "Model"); ok {
+			brand = strings.TrimSpace(before)
 		} else {
 			brand = strings.TrimSpace(rest)
 		}
 	}
-	if idx := strings.Index(raw, "Model Bilgileri:"); idx != -1 {
-		model = strings.TrimSpace(raw[idx+16:])
-	} else if idx := strings.Index(raw, "Pazar Adı:"); idx != -1 {
-		rest := raw[idx+11:]
+	if _, after, found := strings.Cut(raw, "Model Bilgileri:"); found {
+		model = strings.TrimSpace(after)
+	} else if _, rest, found := strings.Cut(raw, "Pazar Adı:"); found {
 		if end := strings.IndexAny(rest, ",\n"); end != -1 {
 			model = strings.TrimSpace(rest[:end])
 		} else {

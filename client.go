@@ -48,10 +48,7 @@ type Client struct {
 }
 
 func New(cfg Config) *Client {
-	solverRetries := len(cfg.APIKeys) + 3
-	if solverRetries < 5 {
-		solverRetries = 5
-	}
+	solverRetries := max(len(cfg.APIKeys)+3, 5)
 	maxAttempts := cfg.MaxAttempts
 	if maxAttempts <= 0 {
 		maxAttempts = defaultMaxAttempts
@@ -157,7 +154,7 @@ func loadFormPage(client *http.Client) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -173,7 +170,8 @@ func loadFormPage(client *http.Client) (string, error) {
 }
 
 func downloadCaptcha(client *http.Client) ([]byte, error) {
-	u := fmt.Sprintf("%s%s&rnd=%f", baseURL, captchaURL, rand.Float64())
+	// rand.Float64 is only a cache-buster for the CAPTCHA URL, not security-sensitive.
+	u := fmt.Sprintf("%s%s&rnd=%f", baseURL, captchaURL, rand.Float64()) // #nosec G404
 
 	req, err := http.NewRequest("GET", u, nil)
 	if err != nil {
@@ -188,7 +186,7 @@ func downloadCaptcha(client *http.Client) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != 200 {
 		return nil, fmt.Errorf("captcha download HTTP %d", resp.StatusCode)
@@ -226,8 +224,8 @@ func submitForm(client *http.Client, imei, captchaCode, token string) (string, e
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
-	io.Copy(io.Discard, resp.Body)
+	defer func() { _ = resp.Body.Close() }()
+	_, _ = io.Copy(io.Discard, resp.Body)
 
 	if resp.StatusCode != 302 {
 		return "", fmt.Errorf("expected 302, got HTTP %d", resp.StatusCode)
@@ -258,7 +256,7 @@ func fetchResult(client *http.Client, path string) (*QueryResult, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
