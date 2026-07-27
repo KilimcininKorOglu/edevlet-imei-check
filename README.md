@@ -8,7 +8,7 @@ e-Devlet (turkiye.gov.tr) üzerinden IMEI kayıt durumu sorgulayan Go kütüphan
 go get github.com/KilimcininKorOglu/edevlet-imei-check
 ```
 
-Go 1.26.2 veya üstü gereklidir (`go.mod` içindeki `go 1.26.2` direktifi nedeniyle).
+Go 1.26.5 veya üstü gereklidir (`go.mod` içindeki `go 1.26.5` direktifi nedeniyle).
 
 ## Hızlı Başlangıç
 
@@ -40,6 +40,8 @@ func main() {
 	fmt.Printf("Model:  %s\n", result.Model)
 }
 ```
+
+`Query`, tam 15 haneli (yalnızca rakam) bir IMEI bekler. Uygun olmayan girdi, HTTP isteği yapılmadan önce hata döndürür.
 
 ## Farklı Sağlayıcı Kullanımı
 
@@ -100,14 +102,16 @@ Rate limit (429) alındığında anahtarlar otomatik olarak rotate edilir. Detay
 
 ```go
 type QueryResult struct {
-	IMEI      string // Sorgulanan IMEI numarası
-	Status    string // Normalize edilmiş durum (yukarıdaki tabloya bakın)
-	RawStatus string // e-Devlet'ten gelen orijinal Türkçe metin
-	Source    string // Kayıt kaynağı
-	Brand     string // Cihaz markası
-	Model     string // Cihaz modeli
+	IMEI      string `json:"imei"`       // Sorgulanan IMEI numarası
+	Status    string `json:"status"`     // Normalize edilmiş durum (yukarıdaki tabloya bakın)
+	RawStatus string `json:"raw_status"` // e-Devlet'ten gelen orijinal Türkçe metin
+	Source    string `json:"source"`     // Kayıt kaynağı
+	Brand     string `json:"brand"`      // Cihaz markası
+	Model     string `json:"model"`      // Cihaz modeli
 }
 ```
+
+Tüm alanlar JSON etiketlidir; sonuç doğrudan `encoding/json` ile serileştirilebilir.
 
 ## Nasıl Çalışır
 
@@ -118,7 +122,7 @@ type QueryResult struct {
 5. 302 yönlendirmesini takip ederek sonuç sayfasına ulaşır
 6. HTML yanıtını parse eder ve durumu normalize eder
 
-Her sorgu yeni bir HTTP oturumu (temiz cookie jar) oluşturur. Başarısız denemeler 5 saniye arayla en fazla 10 kez (`MaxAttempts` ile ayarlanabilir) tekrarlanır.
+Her sorgu yeni bir HTTP oturumu (temiz cookie jar) oluşturur. İki retry katmanı vardır: dış katman tüm akışı 5 saniye arayla en fazla `MaxAttempts` (varsayılan 10) kez tekrarlar; iç katman CAPTCHA çözümünü solver seviyesinde yeniden dener. Yanlış CAPTCHA, beklenmeyen yönlendirme olarak algılanır ve dış katmanda yeni bir deneme tetikler.
 
 ## Gereksinimler
 
